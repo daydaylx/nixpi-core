@@ -23,6 +23,7 @@ import {
 	nixCheck,
 	nixEval,
 	repoFingerprint,
+	resolveHost,
 	stageRequired,
 } from "../nix/ops.ts";
 import { findSecretInContent, GuardError, MAX_FILE_BYTES, resolveRepoPath } from "../policy/guard.ts";
@@ -232,13 +233,20 @@ export function mutateTools(d: NixpiDeps): AnyTool[] {
 	const nixEvalTool = defineTool({
 		name: "nix_eval",
 		label: "Evaluieren",
-		description: "Nur Evaluation des Zielhosts (kein Build).",
-		parameters: Type.Object({}),
-		async execute() {
+		description: "Nur Evaluation des Zielhosts (kein Build). Optional anderer Flake-Host.",
+		parameters: Type.Object({
+			host: Type.Optional(
+				Type.String({
+					description: "Anderer Flake-Host (nur bauen/evaluieren; angewendet wird immer nur der lokale Host)",
+				}),
+			),
+		}),
+		async execute(_id, p) {
 			try {
 				requireChange();
 				await stageRequired(d.runner, repo);
-				const r = await nixEval(d.runner, repo, d.paths.host);
+				const host = await resolveHost(d.runner, repo, d.paths.host, p.host);
+				const r = await nixEval(d.runner, repo, host);
 				return textResult(buildOutput(r).text, r);
 			} catch (e) {
 				return errorResult(msg(e));
@@ -267,16 +275,33 @@ export function mutateTools(d: NixpiDeps): AnyTool[] {
 		description:
 			"Baut den Zielhost (ohne Aktivierung, ohne Root). Voraussetzung für nix_test/nix_switch. Liefert strukturierte Fehler.",
 		promptSnippet: "nix_build: Zielhost bauen (vor jedem Apply)",
-		parameters: Type.Object({}),
-		async execute() {
+		parameters: Type.Object({
+			host: Type.Optional(
+				Type.String({
+					description: "Anderer Flake-Host (nur bauen/evaluieren; angewendet wird immer nur der lokale Host)",
+				}),
+			),
+		}),
+		async execute(_id, p, signal, onUpdate) {
 			try {
 				requireChange();
-				const r = await nixBuild(d.runner, repo, d.paths.host);
+				const host = await resolveHost(d.runner, repo, d.paths.host, p.host);
+				let last = 0;
+				const r = await nixBuild(d.runner, repo, host, {
+					signal,
+					onProgress: (line) => {
+						const now = Date.now();
+						if (now - last < 1000) return;
+						last = now;
+						onUpdate?.({ content: [{ type: "text", text: `Build (${host}): ${line}` }], details: undefined });
+					},
+				});
 				const fp = await repoFingerprint(d.runner, repo);
 				const id = d.work.currentChangeId;
 				if (r.success && r.outPath && id) {
-					d.work.lastBuild = { changeId: id, fingerprint: fp, outPath: r.outPath };
+					d.work.lastBuild = { changeId: id, fingerprint: fp, outPath: r.outPath, host };
 					d.store.update(id, {
+						host,
 						status: "built",
 						buildResult: { success: true, outPath: r.outPath, fingerprint: fp },
 					});
@@ -298,6 +323,10 @@ export function mutateTools(d: NixpiDeps): AnyTool[] {
 		const cs = id ? d.store.get(id) : undefined;
 		if (!cs) return errorResult("Kein aktives ChangeSet – es gibt nichts anzuwenden.");
 		const fp = await repoFingerprint(d.runner, repo);
+		if (d.work.lastBuild && d.work.lastBuild.host !== d.paths.host)
+			return errorResult(
+				`Letzter Build war für Host '${d.work.lastBuild.host}'. Angewendet wird nur der lokale Host '${d.paths.host}' – dafür erst nix_build ohne host.`,
+			);
 		const built = d.work.lastBuild?.changeId === cs.id && d.work.lastBuild.fingerprint === fp;
 		const planApproved = d.getState().planApproved;
 		const pre = gateApply({ risk: cs.risk, buildSucceeded: built, planApproved, userApproved: true });

@@ -532,6 +532,10 @@ try {
 	if (err.code !== "ENOENT") throw e;
 }
 
+// NixPi test hook: `npm run test:identity` runs the upstream Pi tests that assert Pi's identity under
+// Pi's identity (name "pi", ".pi"). Only honored inside vitest, never in a built binary.
+if (process.env.VITEST && process.env.NIXPI_TEST_PI_IDENTITY) pkg = { ...pkg, piConfig: { configDir: ".pi" } };
+
 const piConfigName: string | undefined = pkg.piConfig?.name;
 export const PACKAGE_NAME: string = pkg.name || "@earendil-works/pi-coding-agent";
 export const APP_NAME: string = piConfigName || "pi";

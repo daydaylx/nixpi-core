@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import type { Risk } from "../policy/modes.ts";
 
@@ -22,13 +22,51 @@ export interface ChangeSet {
 	gitCommit?: string;
 	generation?: number;
 	decisionRecord?: string;
+	/** Flake host this change was built/applied for. */
+	host?: string;
 	status: ChangeStatus;
 }
 
+const LOCK_STALE_MS = 15_000;
+const LOCK_TIMEOUT_MS = 10_000;
+
+const sleepSync = (ms: number) => Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+
 export class ChangeStore {
 	private file: string;
+	private lockDir: string;
 	constructor(stateDir: string) {
 		this.file = join(stateDir, "changesets.json");
+		this.lockDir = `${this.file}.lock`;
+	}
+
+	/** Cross-process lock (atomic mkdir). Stale locks from crashed processes are taken over. */
+	private withLock<T>(fn: () => T): T {
+		mkdirSync(dirname(this.file), { recursive: true });
+		const start = Date.now();
+		for (;;) {
+			try {
+				mkdirSync(this.lockDir);
+				break;
+			} catch (e) {
+				if ((e as NodeJS.ErrnoException).code !== "EEXIST") throw e;
+				try {
+					if (Date.now() - statSync(this.lockDir).mtimeMs > LOCK_STALE_MS) {
+						rmSync(this.lockDir, { recursive: true, force: true });
+						continue;
+					}
+				} catch {
+					continue; // released meanwhile
+				}
+				if (Date.now() - start > LOCK_TIMEOUT_MS) throw new Error("ChangeSet-Store gesperrt (Timeout)");
+				sleepSync(10 + Math.floor(Math.random() * 20));
+			}
+		}
+		try {
+			return fn();
+		} finally {
+			rmSync(this.lockDir, { recursive: true, force: true });
+		}
 	}
 
 	private read(): ChangeSet[] {
@@ -48,6 +86,10 @@ export class ChangeStore {
 	}
 
 	create(init: Pick<ChangeSet, "userIntent" | "risk"> & Partial<ChangeSet>): ChangeSet {
+		return this.withLock(() => this.createLocked(init));
+	}
+
+	private createLocked(init: Pick<ChangeSet, "userIntent" | "risk"> & Partial<ChangeSet>): ChangeSet {
 		const all = this.read();
 		const cs: ChangeSet = {
 			id: `cs-${new Date()
@@ -69,6 +111,10 @@ export class ChangeStore {
 	}
 
 	update(id: string, patch: Partial<ChangeSet>): ChangeSet {
+		return this.withLock(() => this.updateLocked(id, patch));
+	}
+
+	private updateLocked(id: string, patch: Partial<ChangeSet>): ChangeSet {
 		const all = this.read();
 		const i = all.findIndex((c) => c.id === id);
 		if (i < 0) throw new Error(`ChangeSet nicht gefunden: ${id}`);

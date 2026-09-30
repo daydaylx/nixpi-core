@@ -6,6 +6,8 @@ export interface RunOptions {
 	input?: string;
 	env?: NodeJS.ProcessEnv;
 	signal?: AbortSignal;
+	/** Called for every complete output line (stdout and stderr), e.g. for build progress. */
+	onLine?: (line: string) => void;
 }
 
 export interface RunResult {
@@ -67,11 +69,21 @@ export class SystemRunner implements Runner {
 				}
 				return cur + chunk.toString("utf-8");
 			};
+			const pending = { out: "", err: "" };
+			const feed = (key: "out" | "err", c: Buffer) => {
+				if (!opts.onLine) return;
+				pending[key] += c.toString("utf-8");
+				const parts = pending[key].split(/\r?\n|\r/);
+				pending[key] = parts.pop() ?? "";
+				for (const l of parts) if (l.trim()) opts.onLine(l);
+			};
 			child.stdout.on("data", (c: Buffer) => {
 				stdout = cap(stdout, c);
+				feed("out", c);
 			});
 			child.stderr.on("data", (c: Buffer) => {
 				stderr = cap(stderr, c);
+				feed("err", c);
 			});
 			const timer = opts.timeoutMs
 				? setTimeout(() => {
@@ -85,6 +97,7 @@ export class SystemRunner implements Runner {
 			});
 			child.on("close", (code) => {
 				if (timer) clearTimeout(timer);
+				if (opts.onLine) for (const l of [pending.out, pending.err]) if (l.trim()) opts.onLine(l);
 				resolve({ code, stdout, stderr, timedOut, truncated });
 			});
 			if (opts.input !== undefined) child.stdin.end(opts.input);
@@ -103,6 +116,8 @@ export class FakeRunner implements Runner {
 	async run(cmd: string, args: string[], opts?: RunOptions): Promise<RunResult> {
 		this.calls.push({ cmd, args, opts });
 		const r = this.handler(cmd, args) ?? {};
+		if (opts?.onLine)
+			for (const l of `${r.stdout ?? ""}\n${r.stderr ?? ""}`.split("\n")) if (l.trim()) opts.onLine(l);
 		return { code: 0, stdout: "", stderr: "", timedOut: false, truncated: false, ...r };
 	}
 }

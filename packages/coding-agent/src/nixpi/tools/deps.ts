@@ -10,7 +10,7 @@ import type { ModeEvent, ModeState } from "../policy/modes.ts";
 export interface SessionWork {
 	currentChangeId?: string;
 	/** Fingerprint + store path of the last successful build, invalidated by any later edit. */
-	lastBuild?: { changeId: string; fingerprint: string; outPath: string };
+	lastBuild?: { changeId: string; fingerprint: string; outPath: string; host: string };
 	/** True after web content entered the context: mutating/apply tools then need fresh user approval. */
 	webTainted: boolean;
 }

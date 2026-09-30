@@ -145,7 +145,7 @@ describe("config_patch", () => {
 
 	it("invalidates an earlier build after a further edit", async () => {
 		const h = setup();
-		h.deps.work.lastBuild = { changeId: "x", fingerprint: "f", outPath: "/nix/store/x" };
+		h.deps.work.lastBuild = { changeId: "x", fingerprint: "f", outPath: "/nix/store/x", host: "testhost" };
 		await call(h, "config_patch", args(h));
 		expect(h.deps.work.lastBuild).toBeUndefined();
 	});
@@ -267,6 +267,7 @@ describe("apply gate (nix_switch / nix_test / git_commit)", () => {
 			changeId: h.deps.work.currentChangeId!,
 			fingerprint: await repoFingerprint(runner, h.repo),
 			outPath: "/nix/store/x",
+			host: "testhost",
 		};
 		const r = await call(h, "nix_switch", {}, tuiCtx(true));
 		expect(r.text).toMatch(/HIGH-Risiko/);
@@ -293,6 +294,7 @@ describe("apply gate (nix_switch / nix_test / git_commit)", () => {
 			changeId: h.deps.work.currentChangeId!,
 			fingerprint: await repoFingerprint(runner, h.repo),
 			outPath: "/nix/store/x",
+			host: "testhost",
 		};
 		const r = await call(h, "nix_switch", {}, tuiCtx(false));
 		expect(r.text).toMatch(/abgebrochen/);
@@ -314,6 +316,7 @@ describe("apply gate (nix_switch / nix_test / git_commit)", () => {
 			changeId: h.deps.work.currentChangeId!,
 			fingerprint: await repoFingerprint(h.runner, h.repo),
 			outPath: "/nix/store/x",
+			host: "testhost",
 		};
 		const r = await call(h, "git_commit", {});
 		expect(r.text).toContain("nixpi: Kitty statt Firefox");

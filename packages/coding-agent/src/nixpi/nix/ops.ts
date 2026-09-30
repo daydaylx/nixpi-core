@@ -64,6 +64,67 @@ export async function stageRequired(runner: Runner, repo: string): Promise<{ sta
 
 const flakeRef = (repo: string, host: string) => `${repo}#nixosConfigurations.${host}.config.system.build.toplevel`;
 
+export interface BuildOptions {
+	timeoutMs?: number;
+	signal?: AbortSignal;
+	/** Receives a short human-readable progress line (what nix is doing right now). */
+	onProgress?: (line: string) => void;
+}
+
+/** `NIXPI_BUILD_TIMEOUT_MIN` (minutes, default 120). */
+export function buildTimeoutMs(env: NodeJS.ProcessEnv = process.env): number {
+	const m = Number(env.NIXPI_BUILD_TIMEOUT_MIN);
+	return (Number.isFinite(m) && m > 0 ? m : 120) * 60_000;
+}
+
+/** Shortens nix output lines like `building '/nix/store/<hash>-foo-1.2.drv'...` to `building foo-1.2`. */
+export function summarizeProgress(line: string): string {
+	const l = line.trim();
+	const m = l.match(
+		/^(building|copying path|downloading|fetching)\s+'?(?:\/nix\/store\/[a-z0-9]{32}-)?([^'\s]+?)(?:\.drv)?'?(?:\s|\.\.\.|$)/,
+	);
+	return m ? `${m[1]} ${m[2]}` : l.slice(0, 120);
+}
+
+const HOST_RE = /^[A-Za-z0-9_-]+$/;
+
+/** Hosts defined in the flake (`nixosConfigurations`). Returns undefined if nix cannot tell. */
+export async function listHosts(runner: Runner, repo: string): Promise<string[] | undefined> {
+	const r = await runner.run(
+		"nix",
+		["eval", "--json", `${repo}#nixosConfigurations`, "--apply", "builtins.attrNames"],
+		{
+			cwd: repo,
+			timeoutMs: 120_000,
+		},
+	);
+	if (r.code !== 0) return undefined;
+	try {
+		const hosts = JSON.parse(r.stdout) as string[];
+		return hosts.filter((h) => HOST_RE.test(h));
+	} catch {
+		return undefined;
+	}
+}
+
+/**
+ * Resolves the host a tool call targets. No `requested` host = the configured default.
+ * A different host must be a plain identifier and exist in the flake.
+ */
+export async function resolveHost(
+	runner: Runner,
+	repo: string,
+	defaultHost: string,
+	requested?: string,
+): Promise<string> {
+	if (!requested || requested === defaultHost) return defaultHost;
+	if (!HOST_RE.test(requested)) throw new Error(`Ungültiger Hostname: ${requested}`);
+	const hosts = await listHosts(runner, repo);
+	if (!hosts) throw new Error("Hostliste des Flakes nicht lesbar – nur der Standard-Host ist erlaubt.");
+	if (!hosts.includes(requested)) throw new Error(`Host '${requested}' nicht im Flake. Bekannt: ${hosts.join(", ")}`);
+	return requested;
+}
+
 export async function nixEval(runner: Runner, repo: string, host: string): Promise<BuildResult> {
 	const r = await runner.run("nix", ["eval", "--raw", `${flakeRef(repo, host)}.drvPath`], {
 		cwd: repo,
@@ -83,11 +144,18 @@ export async function nixCheck(runner: Runner, repo: string): Promise<BuildResul
 }
 
 /** Builds the host closure without touching the running system (no sudo, no activation). */
-export async function nixBuild(runner: Runner, repo: string, host: string): Promise<BuildResult> {
+export async function nixBuild(
+	runner: Runner,
+	repo: string,
+	host: string,
+	opts: BuildOptions = {},
+): Promise<BuildResult> {
 	await stageRequired(runner, repo);
 	const r = await runner.run("nix", ["build", flakeRef(repo, host), "--no-link", "--print-out-paths"], {
 		cwd: repo,
-		timeoutMs: 2 * 60 * 60_000,
+		timeoutMs: opts.timeoutMs ?? buildTimeoutMs(),
+		signal: opts.signal,
+		onLine: opts.onProgress ? (l) => opts.onProgress!(summarizeProgress(l)) : undefined,
 	});
 	const out = r.stdout.trim().split("\n").filter(Boolean).pop();
 	return { success: r.code === 0 && !!out, outPath: out, ...parseNixOutput(r.stderr), timedOut: r.timedOut };

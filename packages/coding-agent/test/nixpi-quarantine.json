@@ -12,7 +12,7 @@
   {
     "file": "test/credential-print.test.ts",
     "category": "identity",
-    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+    "reason": "prüft Pi-Identität (.pi, PI_*-Env, Name \"pi\"); läuft unter Pi-Identität via `npm run test:identity` (in CI), nicht im Standardlauf"
   },
   {
     "file": "test/default-tools-setting.test.ts",
@@ -27,37 +27,37 @@
   {
     "file": "test/experimental-remote-runtime.test.ts",
     "category": "identity",
-    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+    "reason": "prüft Pi-Identität (.pi, PI_*-Env, Name \"pi\"); läuft unter Pi-Identität via `npm run test:identity` (in CI), nicht im Standardlauf"
   },
   {
     "file": "test/experimental-session-directory.test.ts",
     "category": "identity",
-    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+    "reason": "prüft Pi-Identität (.pi, PI_*-Env, Name \"pi\"); läuft unter Pi-Identität via `npm run test:identity` (in CI), nicht im Standardlauf"
   },
   {
     "file": "test/first-time-setup.test.ts",
     "category": "identity",
-    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+    "reason": "prüft Pi-Identität (.pi, PI_*-Env, Name \"pi\"); läuft unter Pi-Identität via `npm run test:identity` (in CI), nicht im Standardlauf"
   },
   {
     "file": "test/interactive-mode-bug-report-hint.test.ts",
     "category": "identity",
-    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+    "reason": "prüft Pi-Identität (.pi, PI_*-Env, Name \"pi\"); läuft unter Pi-Identität via `npm run test:identity` (in CI), nicht im Standardlauf"
   },
   {
     "file": "test/mcp-command.test.ts",
     "category": "identity",
-    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+    "reason": "prüft Pi-Identität (.pi, PI_*-Env, Name \"pi\"); läuft unter Pi-Identität via `npm run test:identity` (in CI), nicht im Standardlauf"
   },
   {
     "file": "test/mcp-extension.test.ts",
     "category": "identity",
-    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+    "reason": "prüft Pi-Identität (.pi, PI_*-Env, Name \"pi\"); läuft unter Pi-Identität via `npm run test:identity` (in CI), nicht im Standardlauf"
   },
   {
     "file": "test/package-command-paths.test.ts",
     "category": "identity",
-    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+    "reason": "prüft Pi-Identität (.pi, PI_*-Env, Name \"pi\"); läuft unter Pi-Identität via `npm run test:identity` (in CI), nicht im Standardlauf"
   },
   {
     "file": "test/package-distribution.test.ts",
@@ -67,7 +67,7 @@
   {
     "file": "test/package-manager.test.ts",
     "category": "identity",
-    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+    "reason": "prüft Pi-Identität (.pi, PI_*-Env, Name \"pi\"); läuft unter Pi-Identität via `npm run test:identity` (in CI), nicht im Standardlauf"
   },
   {
     "file": "test/resource-loader.test.ts",
@@ -82,17 +82,17 @@
   {
     "file": "test/session-file-invalid.test.ts",
     "category": "identity",
-    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+    "reason": "prüft Pi-Identität (.pi, PI_*-Env, Name \"pi\"); läuft unter Pi-Identität via `npm run test:identity` (in CI), nicht im Standardlauf"
   },
   {
     "file": "test/session-manager/file-operations.test.ts",
     "category": "identity",
-    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+    "reason": "prüft Pi-Identität (.pi, PI_*-Env, Name \"pi\"); läuft unter Pi-Identität via `npm run test:identity` (in CI), nicht im Standardlauf"
   },
   {
     "file": "test/settings-manager-bug.test.ts",
     "category": "identity",
-    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+    "reason": "prüft Pi-Identität (.pi, PI_*-Env, Name \"pi\"); läuft unter Pi-Identität via `npm run test:identity` (in CI), nicht im Standardlauf"
   },
   {
     "file": "test/settings-manager.test.ts",
@@ -122,7 +122,7 @@
   {
     "file": "test/suite/agent-session-mcp-oauth.test.ts",
     "category": "identity",
-    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+    "reason": "prüft Pi-Identität (.pi, PI_*-Env, Name \"pi\"); läuft unter Pi-Identität via `npm run test:identity` (in CI), nicht im Standardlauf"
   },
   {
     "file": "test/suite/agent-session-model-extension.test.ts",
@@ -137,12 +137,12 @@
   {
     "file": "test/suite/regressions/2781-skill-collision-precedence.test.ts",
     "category": "identity",
-    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+    "reason": "prüft Pi-Identität (.pi, PI_*-Env, Name \"pi\"); läuft unter Pi-Identität via `npm run test:identity` (in CI), nicht im Standardlauf"
   },
   {
     "file": "test/suite/regressions/2791-fswatch-error-crash.test.ts",
     "category": "identity",
-    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+    "reason": "prüft Pi-Identität (.pi, PI_*-Env, Name \"pi\"); läuft unter Pi-Identität via `npm run test:identity` (in CI), nicht im Standardlauf"
   },
   {
     "file": "test/suite/regressions/2835-tools-allowlist-filters-extension-tools.test.ts",
@@ -172,7 +172,7 @@
   {
     "file": "test/suite/regressions/8337-utf8-bom-parsing.test.ts",
     "category": "identity",
-    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+    "reason": "prüft Pi-Identität (.pi, PI_*-Env, Name \"pi\"); läuft unter Pi-Identität via `npm run test:identity` (in CI), nicht im Standardlauf"
   },
   {
     "file": "test/suite/regressions/9789-context-handler-system-messages.test.ts",
@@ -192,12 +192,12 @@
   {
     "file": "test/theme-export.test.ts",
     "category": "identity",
-    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+    "reason": "prüft Pi-Identität (.pi, PI_*-Env, Name \"pi\"); läuft unter Pi-Identität via `npm run test:identity` (in CI), nicht im Standardlauf"
   },
   {
     "file": "test/theme-picker.test.ts",
     "category": "identity",
-    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+    "reason": "prüft Pi-Identität (.pi, PI_*-Env, Name \"pi\"); läuft unter Pi-Identität via `npm run test:identity` (in CI), nicht im Standardlauf"
   },
   {
     "file": "test/tool-renderer-examples.test.ts",
@@ -212,6 +212,6 @@
   {
     "file": "test/trust-manager.test.ts",
     "category": "identity",
-    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+    "reason": "prüft Pi-Identität (.pi, PI_*-Env, Name \"pi\"); läuft unter Pi-Identität via `npm run test:identity` (in CI), nicht im Standardlauf"
   }
 ]
