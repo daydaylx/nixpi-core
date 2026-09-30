@@ -775,11 +775,13 @@ export async function main(args: string[], options?: MainOptions) {
 				additionalSkillPaths: resolvedSkillPaths,
 				additionalPromptTemplatePaths: resolvedPromptTemplatePaths,
 				additionalThemePaths: resolvedThemePaths,
-				noExtensions: parsed.noExtensions,
-				noSkills: parsed.noSkills,
-				noPromptTemplates: parsed.noPromptTemplates,
+				// NixPi trust model: no third-party extensions, skills, prompt templates or
+				// project context files (AGENTS.md etc.) are loaded automatically.
+				noExtensions: false,
+				noSkills: true,
+				noPromptTemplates: true,
 				noThemes: parsed.noThemes,
-				noContextFiles: parsed.noContextFiles,
+				noContextFiles: true,
 				systemPrompt: parsed.systemPrompt,
 				appendSystemPrompt: parsed.appendSystemPrompt,
 				extensionFactories,

@@ -210,7 +210,8 @@ function deepMergeObjects(base: Record<string, unknown>, overrides: Record<strin
 }
 
 /** Tools enabled at startup when `defaultTools` does not change them. */
-export const DEFAULT_TOOL_NAMES: readonly string[] = ["read", "bash", "edit", "write"];
+// NixPi: no built-in coding tools (no bash/edit/write); NixPi registers its own tools via src/nixpi.
+export const DEFAULT_TOOL_NAMES: readonly string[] = [];
 
 function isToolModifier(entry: unknown): boolean {
 	return typeof entry === "string" && (entry.startsWith("+") || entry.startsWith("-"));

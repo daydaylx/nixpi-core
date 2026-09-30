@@ -4,6 +4,7 @@ import { detectCapabilities, getTerminalColorMode, type TerminalColorMode } from
 import chalk from "chalk";
 import { CONFIG_DIR_NAME } from "../config.ts";
 import { loadThemeFromPath, type Theme } from "../modes/interactive/theme/theme.ts";
+import { onlyBuiltinExtensions } from "../nixpi/policy/resources.ts";
 import type { ResourceDiagnostic } from "./diagnostics.ts";
 
 export type { ResourceCollision, ResourceDiagnostic } from "./diagnostics.ts";
@@ -566,9 +567,9 @@ export class DefaultResourceLoader implements ResourceLoader {
 		const cliEnabledPrompts = getEnabledPaths(cliExtensionPaths.prompts);
 		const cliEnabledThemes = getEnabledPaths(cliExtensionPaths.themes);
 
-		const extensionPaths = this.noExtensions
-			? cliEnabledExtensions
-			: this.mergePaths(cliEnabledExtensions, enabledExtensions);
+		const extensionPaths = onlyBuiltinExtensions(
+			this.noExtensions ? cliEnabledExtensions : this.mergePaths(cliEnabledExtensions, enabledExtensions),
+		);
 
 		const packageWarnings = collectExtensionPackageWarnings(extensionPaths, metadataByPath);
 		const extensionsResult = await this.loadFinalExtensionSet(extensionPaths, preTrustExtensions);
@@ -674,8 +675,8 @@ export class DefaultResourceLoader implements ResourceLoader {
 		const cliEnabledExtensions = cliExtensionPaths.extensions.filter((r) => r.enabled).map((r) => r.path);
 		// Built-in extensions wait for the final pass: project settings can disable them, and a loaded
 		// extension cannot be unloaded.
-		const extensionPaths = (
-			this.noExtensions ? cliEnabledExtensions : this.mergePaths(cliEnabledExtensions, enabledExtensions)
+		const extensionPaths = onlyBuiltinExtensions(
+			this.noExtensions ? cliEnabledExtensions : this.mergePaths(cliEnabledExtensions, enabledExtensions),
 		).filter((path) => !path.startsWith(BUILTIN_PATH_PREFIX));
 		const metadataByPath = new Map(
 			[...resolvedPaths.extensions, ...cliExtensionPaths.extensions].map((resource) => [
