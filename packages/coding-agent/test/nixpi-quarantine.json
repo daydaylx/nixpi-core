@@ -1,0 +1,217 @@
+[
+  {
+    "file": "test/agent-session-dynamic-tools.test.ts",
+    "category": "tool-boundary",
+    "reason": "prüft Pi-Standardverhalten, das NixPi bewusst entfernt (Built-in-Coding-Tools, Datei-/Paket-Extensions, codemode/tool-search, Pi-Hilfetext)"
+  },
+  {
+    "file": "test/builtin-tool-strict-mode.test.ts",
+    "category": "tool-boundary",
+    "reason": "prüft Pi-Standardverhalten, das NixPi bewusst entfernt (Built-in-Coding-Tools, Datei-/Paket-Extensions, codemode/tool-search, Pi-Hilfetext)"
+  },
+  {
+    "file": "test/credential-print.test.ts",
+    "category": "identity",
+    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+  },
+  {
+    "file": "test/default-tools-setting.test.ts",
+    "category": "tool-boundary",
+    "reason": "prüft Pi-Standardverhalten, das NixPi bewusst entfernt (Built-in-Coding-Tools, Datei-/Paket-Extensions, codemode/tool-search, Pi-Hilfetext)"
+  },
+  {
+    "file": "test/experimental-cli-entry.test.ts",
+    "category": "tool-boundary",
+    "reason": "prüft Pi-Standardverhalten, das NixPi bewusst entfernt (Built-in-Coding-Tools, Datei-/Paket-Extensions, codemode/tool-search, Pi-Hilfetext)"
+  },
+  {
+    "file": "test/experimental-remote-runtime.test.ts",
+    "category": "identity",
+    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+  },
+  {
+    "file": "test/experimental-session-directory.test.ts",
+    "category": "identity",
+    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+  },
+  {
+    "file": "test/first-time-setup.test.ts",
+    "category": "identity",
+    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+  },
+  {
+    "file": "test/interactive-mode-bug-report-hint.test.ts",
+    "category": "identity",
+    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+  },
+  {
+    "file": "test/mcp-command.test.ts",
+    "category": "identity",
+    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+  },
+  {
+    "file": "test/mcp-extension.test.ts",
+    "category": "identity",
+    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+  },
+  {
+    "file": "test/package-command-paths.test.ts",
+    "category": "identity",
+    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+  },
+  {
+    "file": "test/package-distribution.test.ts",
+    "category": "tool-boundary",
+    "reason": "prüft Pi-Standardverhalten, das NixPi bewusst entfernt (Built-in-Coding-Tools, Datei-/Paket-Extensions, codemode/tool-search, Pi-Hilfetext)"
+  },
+  {
+    "file": "test/package-manager.test.ts",
+    "category": "identity",
+    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+  },
+  {
+    "file": "test/resource-loader.test.ts",
+    "category": "tool-boundary",
+    "reason": "prüft Pi-Standardverhalten, das NixPi bewusst entfernt (Built-in-Coding-Tools, Datei-/Paket-Extensions, codemode/tool-search, Pi-Hilfetext)"
+  },
+  {
+    "file": "test/sdk-session-manager.test.ts",
+    "category": "tool-boundary",
+    "reason": "prüft Pi-Standardverhalten, das NixPi bewusst entfernt (Built-in-Coding-Tools, Datei-/Paket-Extensions, codemode/tool-search, Pi-Hilfetext)"
+  },
+  {
+    "file": "test/session-file-invalid.test.ts",
+    "category": "identity",
+    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+  },
+  {
+    "file": "test/session-manager/file-operations.test.ts",
+    "category": "identity",
+    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+  },
+  {
+    "file": "test/settings-manager-bug.test.ts",
+    "category": "identity",
+    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+  },
+  {
+    "file": "test/settings-manager.test.ts",
+    "category": "tool-boundary",
+    "reason": "prüft Pi-Standardverhalten, das NixPi bewusst entfernt (Built-in-Coding-Tools, Datei-/Paket-Extensions, codemode/tool-search, Pi-Hilfetext)"
+  },
+  {
+    "file": "test/stdout-cleanliness.test.ts",
+    "category": "tool-boundary",
+    "reason": "prüft Pi-Standardverhalten, das NixPi bewusst entfernt (Built-in-Coding-Tools, Datei-/Paket-Extensions, codemode/tool-search, Pi-Hilfetext)"
+  },
+  {
+    "file": "test/suite/agent-session-boundaries.test.ts",
+    "category": "tool-boundary",
+    "reason": "prüft Pi-Standardverhalten, das NixPi bewusst entfernt (Built-in-Coding-Tools, Datei-/Paket-Extensions, codemode/tool-search, Pi-Hilfetext)"
+  },
+  {
+    "file": "test/suite/agent-session-codemode.test.ts",
+    "category": "tool-boundary",
+    "reason": "prüft Pi-Standardverhalten, das NixPi bewusst entfernt (Built-in-Coding-Tools, Datei-/Paket-Extensions, codemode/tool-search, Pi-Hilfetext)"
+  },
+  {
+    "file": "test/suite/agent-session-compaction.test.ts",
+    "category": "tool-boundary",
+    "reason": "prüft Pi-Standardverhalten, das NixPi bewusst entfernt (Built-in-Coding-Tools, Datei-/Paket-Extensions, codemode/tool-search, Pi-Hilfetext)"
+  },
+  {
+    "file": "test/suite/agent-session-mcp-oauth.test.ts",
+    "category": "identity",
+    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+  },
+  {
+    "file": "test/suite/agent-session-model-extension.test.ts",
+    "category": "tool-boundary",
+    "reason": "prüft Pi-Standardverhalten, das NixPi bewusst entfernt (Built-in-Coding-Tools, Datei-/Paket-Extensions, codemode/tool-search, Pi-Hilfetext)"
+  },
+  {
+    "file": "test/suite/agent-session-tool-orchestration.test.ts",
+    "category": "tool-boundary",
+    "reason": "prüft Pi-Standardverhalten, das NixPi bewusst entfernt (Built-in-Coding-Tools, Datei-/Paket-Extensions, codemode/tool-search, Pi-Hilfetext)"
+  },
+  {
+    "file": "test/suite/regressions/2781-skill-collision-precedence.test.ts",
+    "category": "identity",
+    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+  },
+  {
+    "file": "test/suite/regressions/2791-fswatch-error-crash.test.ts",
+    "category": "identity",
+    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+  },
+  {
+    "file": "test/suite/regressions/2835-tools-allowlist-filters-extension-tools.test.ts",
+    "category": "tool-boundary",
+    "reason": "prüft Pi-Standardverhalten, das NixPi bewusst entfernt (Built-in-Coding-Tools, Datei-/Paket-Extensions, codemode/tool-search, Pi-Hilfetext)"
+  },
+  {
+    "file": "test/suite/regressions/3302-find-path-glob.test.ts",
+    "category": "env",
+    "reason": "benötigt einen fd-Download in ~/.nixpi/agent/bin; find/grep-Tools gehören nicht zu NixPi"
+  },
+  {
+    "file": "test/suite/regressions/3303-find-nested-gitignore.test.ts",
+    "category": "env",
+    "reason": "benötigt einen fd-Download in ~/.nixpi/agent/bin; find/grep-Tools gehören nicht zu NixPi"
+  },
+  {
+    "file": "test/suite/regressions/3592-no-builtin-tools-keeps-extension-tools.test.ts",
+    "category": "tool-boundary",
+    "reason": "prüft Pi-Standardverhalten, das NixPi bewusst entfernt (Built-in-Coding-Tools, Datei-/Paket-Extensions, codemode/tool-search, Pi-Hilfetext)"
+  },
+  {
+    "file": "test/suite/regressions/5109-exclude-tools.test.ts",
+    "category": "tool-boundary",
+    "reason": "prüft Pi-Standardverhalten, das NixPi bewusst entfernt (Built-in-Coding-Tools, Datei-/Paket-Extensions, codemode/tool-search, Pi-Hilfetext)"
+  },
+  {
+    "file": "test/suite/regressions/8337-utf8-bom-parsing.test.ts",
+    "category": "identity",
+    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+  },
+  {
+    "file": "test/suite/regressions/9789-context-handler-system-messages.test.ts",
+    "category": "tool-boundary",
+    "reason": "prüft Pi-Standardverhalten, das NixPi bewusst entfernt (Built-in-Coding-Tools, Datei-/Paket-Extensions, codemode/tool-search, Pi-Hilfetext)"
+  },
+  {
+    "file": "test/suite/regressions/extension-factory-cache.test.ts",
+    "category": "tool-boundary",
+    "reason": "prüft Pi-Standardverhalten, das NixPi bewusst entfernt (Built-in-Coding-Tools, Datei-/Paket-Extensions, codemode/tool-search, Pi-Hilfetext)"
+  },
+  {
+    "file": "test/system-prompt-updates.test.ts",
+    "category": "tool-boundary",
+    "reason": "prüft Pi-Standardverhalten, das NixPi bewusst entfernt (Built-in-Coding-Tools, Datei-/Paket-Extensions, codemode/tool-search, Pi-Hilfetext)"
+  },
+  {
+    "file": "test/theme-export.test.ts",
+    "category": "identity",
+    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+  },
+  {
+    "file": "test/theme-picker.test.ts",
+    "category": "identity",
+    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+  },
+  {
+    "file": "test/tool-renderer-examples.test.ts",
+    "category": "tool-boundary",
+    "reason": "prüft Pi-Standardverhalten, das NixPi bewusst entfernt (Built-in-Coding-Tools, Datei-/Paket-Extensions, codemode/tool-search, Pi-Hilfetext)"
+  },
+  {
+    "file": "test/tools.test.ts",
+    "category": "env",
+    "reason": "benötigt einen fd-Download in ~/.nixpi/agent/bin; find/grep-Tools gehören nicht zu NixPi"
+  },
+  {
+    "file": "test/trust-manager.test.ts",
+    "category": "identity",
+    "reason": "prüft Pi-Identität (.pi-Verzeichnis, PI_*-Env-Namen, Name \"pi\" in Meldungen); mit Pi-Identität grün"
+  }
+]
