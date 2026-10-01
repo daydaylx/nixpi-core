@@ -81,16 +81,21 @@ OUT=$("${NIX[@]}" build "$REPO_DIR#nixpi" --no-link --print-out-paths) \
 ok "gebaut: $OUT"
 
 say "In Benutzerprofil installieren"
-if "${NIX[@]}" profile list 2> /dev/null | grep -qF "$OUT"; then
+# 'nix profile list' färbt die Ausgabe auch in Pipes (ANSI) – vor dem Auswerten entfernen.
+profile_list() { "${NIX[@]}" profile list 2> /dev/null | sed 's/\x1b\[[0-9;]*m//g'; }
+# Namen aller Profil-Elemente, deren Store-Pfad ein nixpi-Paket ist (andere Pakete bleiben unberührt).
+old_nixpi_elements() {
+  profile_list | awk '/^Name:/ {name=$2} /^Store paths:/ && $0 ~ /-nixpi-[0-9]/ {print name}'
+}
+if profile_list | grep -qF "$OUT"; then
   ok "diese Version ist bereits installiert"
 else
-  # Alte Version (falls vorhanden) entfernen, dann die gebaute Store-Version installieren.
-  if "${NIX[@]}" profile list 2> /dev/null | grep -Eq '(^|[^[:alnum:]_-])nixpi([^[:alnum:]_-]|$)'; then
-    "${NIX[@]}" profile remove nixpi > /dev/null 2>&1 || true
-  fi
+  for el in $(old_nixpi_elements); do
+    "${NIX[@]}" profile remove "$el" > /dev/null 2>&1 && ok "alte Version entfernt ($el)"
+  done
   # 'profile add' ersetzt das veraltete 'profile install' (ab Nix 2.2x); ältere Versionen kennen nur install.
   "${NIX[@]}" profile add "$OUT" 2> /dev/null || "${NIX[@]}" profile install "$OUT" \
-    || die "nix profile add/install fehlgeschlagen."
+    || die "nix profile add/install fehlgeschlagen." "Alte Version manuell entfernen: nix profile list; nix profile remove nixpi"
   ok "installiert"
 fi
 

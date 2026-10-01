@@ -5,13 +5,21 @@ Das Repository `daydaylx/nixpi-core` ist öffentlich, ein GitHub-Login ist nicht
 
 ```sh
 nix-shell -p git --run 'git clone -b nixpi/main https://github.com/daydaylx/nixpi-core.git ~/nixpi-core'
-cd ~/nixpi-core && ./install.sh
+cd ~/nixpi-core && ./setup.sh
 nixpi version
 nixpi
 ```
 
 (Nur falls das Repo wieder privat wird: `nix-shell -p git gh`, dann `gh auth login -h github.com -p https -w`
 mit Einmalcode am Smartphone und `gh auth setup-git`; auf echtem NixOS nicht getestet.)
+
+## Ein-Befehl-Setup: `setup.sh` (Alias `nixpi-setup`)
+
+`./setup.sh` fasst alles zusammen und fängt typische Probleme ab: fehlendes `git` (startet sich in
+einer `nix shell` neu, nixpkgs-Stand aus `flake.lock`), kein Netzwerk (öffnet `nmtui`, wartet, wiederholt),
+falsche Uhr, zu wenig Platz/RAM, fehlgeschlagener `git pull` (macht lokal weiter), Netzabbruch beim Build
+(bis zu 3 Versuche) und ein altes `nixpi` im Profil (wird ersetzt). Es aktiviert nie das System
+(`--build-config` baut `~/nixos-config` zusätzlich, ohne Aktivierung). Log: `~/nixpi-setup.log`.
 
 ## Was `install.sh` tut (und lässt)
 
