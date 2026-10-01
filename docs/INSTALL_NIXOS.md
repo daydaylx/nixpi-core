@@ -1,22 +1,17 @@
 # NixPi auf einem minimalen NixOS installieren (nur TTY + Netzwerk)
 
 Voraussetzung: NixOS ist installiert, Benutzer mit Netzwerk angemeldet (kein Desktop, kein Browser nötig).
-Das Repository `daydaylx/nixpi-core` ist **privat**, daher zuerst ein Device-Login mit `gh`.
+Das Repository `daydaylx/nixpi-core` ist öffentlich, ein GitHub-Login ist nicht nötig.
 
 ```sh
-nix-shell -p git gh                                  # temporäre Shell mit git + gh
-gh auth login -h github.com -p https -w              # zeigt Code + URL; am Smartphone bestätigen
-gh auth setup-git                                    # git nutzt das gh-Token
-git clone -b nixpi/main https://github.com/daydaylx/nixpi-core.git ~/nixpi-core
-exit                                                 # nix-shell verlassen
+nix-shell -p git --run 'git clone -b nixpi/main https://github.com/daydaylx/nixpi-core.git ~/nixpi-core'
 cd ~/nixpi-core && ./install.sh
 nixpi version
 nixpi
 ```
 
-`gh` zeigt einen Einmalcode; diesen auf <https://github.com/login/device> am Smartphone eingeben. Ist kein
-Browser vorhanden, den Code trotzdem dort bestätigen; `gh` wartet darauf (nicht auf einem echten
-NixOS getestet).
+(Nur falls das Repo wieder privat wird: `nix-shell -p git gh`, dann `gh auth login -h github.com -p https -w`
+mit Einmalcode am Smartphone und `gh auth setup-git`; auf echtem NixOS nicht getestet.)
 
 ## Was `install.sh` tut (und lässt)
 
@@ -45,9 +40,8 @@ vorausgesetzt (auf NixOS immer vorhanden). `sudo` ist nur für das spätere Akti
 ## Auf einem echten NixOS noch zu validieren
 
 `nixpi bootstrap`, `nh os switch`/`nixos-rebuild`, sudo-Verhalten, Generationen/Rollback und die
-Evaluierbarkeit des erzeugten Flakes sind nur gegen Fakes getestet. Ein privates `nixpi-core` als
-Flake-Input in `~/nixos-config` braucht einen GitHub-Token für Nix (`access-tokens`); alternativ
-`install.sh` weiterverwenden statt `--nixpi-flake`.
+Evaluierbarkeit des erzeugten Flakes sind nur gegen Fakes getestet. Als Flake-Input in `~/nixos-config` (`--nixpi-flake github:daydaylx/nixpi-core/nixpi/main`) ist
+`nixpi-core` ohne Token erreichbar.
 
 ## Pflege des Pakets
 
