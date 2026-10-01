@@ -70,7 +70,10 @@ describe("bootstrap repo generation", () => {
 		expect(flake).toContain("nixosConfigurations.laptop");
 		expect(flake).toContain("home-manager.nixosModules.home-manager");
 		expect(flake).toContain("github:owner/nixpi-core");
-		expect(readFileSync(join(repo, "hosts/laptop/default.nix"), "utf-8")).toContain('system.stateVersion = "25.05"');
+		expect(readFileSync(join(repo, "hosts/laptop/configuration.nix"), "utf-8")).toContain(
+			'system.stateVersion = "25.05"',
+		);
+		expect(readFileSync(join(repo, "hosts/laptop/default.nix"), "utf-8")).toContain("./configuration.nix");
 		expect(readFileSync(join(repo, "system/base.nix"), "utf-8")).toContain("programs.nh.enable");
 		expect(readFileSync(join(repo, "system/base.nix"), "utf-8")).toContain("mcp-nixos");
 		const dirty = execFileSync("git", ["status", "--porcelain"], { cwd: repo }).toString();

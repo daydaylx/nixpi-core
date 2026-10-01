@@ -17,7 +17,16 @@ export function nixpkgsBranch(versionId?: string): string {
 	return m ? `nixos-${m[1]}` : "nixos-unstable";
 }
 
-export function renderFiles(o: BootstrapOptions, hardwareConfig: string): Record<string, string> {
+/**
+ * `systemConfig` is the existing `/etc/nixos/configuration.nix`. When given it is carried over verbatim
+ * (bootloader, networking, locale, users, ...) so the managed repo describes the same system; without it
+ * the host module would lack e.g. a bootloader and the generation would not evaluate.
+ */
+export function renderFiles(
+	o: BootstrapOptions,
+	hardwareConfig: string,
+	systemConfig?: string,
+): Record<string, string> {
 	const { sys } = o;
 	if (!safeIdent(sys.host)) throw new Error(`Hostname nicht als Nix-Attribut verwendbar: ${sys.host}`);
 	if (!safeIdent(sys.user)) throw new Error(`Benutzername nicht verwendbar: ${sys.user}`);
@@ -61,16 +70,23 @@ export function renderFiles(o: BootstrapOptions, hardwareConfig: string): Record
 		[`hosts/${sys.host}/default.nix`]: `{ ${hasNixpi ? "nixpi, " : ""}pkgs, ... }:
 {
   imports = [
-    ./hardware-configuration.nix
-    ../../system/base.nix
+${
+	systemConfig
+		? "    ./configuration.nix # übernommen aus /etc/nixos (importiert die hardware-configuration.nix)\n"
+		: "    ./hardware-configuration.nix\n"
+}    ../../system/base.nix
   ];
-
+${
+	systemConfig
+		? ""
+		: `
   networking.hostName = "${sys.host}";
   system.stateVersion = "${sys.stateVersion}";
 
   users.users.${sys.user}.isNormalUser = true;
   users.users.${sys.user}.extraGroups = [ "wheel" "networkmanager" ];
-
+`
+}
   home-manager = {
     useGlobalPkgs = true;
     useUserPackages = true;
@@ -86,6 +102,7 @@ ${
 }}
 `,
 		[`hosts/${sys.host}/hardware-configuration.nix`]: hardwareConfig,
+		...(systemConfig ? { [`hosts/${sys.host}/configuration.nix`]: systemConfig } : {}),
 		"system/base.nix": `{ pkgs, ... }:
 {
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
@@ -135,7 +152,12 @@ export function writeRepo(o: BootstrapOptions): BootstrapResult {
 	if (!o.sys.hasHardwareConfig) throw new Error(`${o.sys.hardwareConfigPath} nicht gefunden.`);
 	if (existsSync(o.repo) && readdirSync(o.repo).length > 0)
 		throw new Error(`${o.repo} existiert bereits und ist nicht leer.`);
-	const files = renderFiles(o, readFileSync(o.sys.hardwareConfigPath, "utf-8"));
+	const systemConfigPath = join(dirname(o.sys.hardwareConfigPath), "configuration.nix");
+	const files = renderFiles(
+		o,
+		readFileSync(o.sys.hardwareConfigPath, "utf-8"),
+		existsSync(systemConfigPath) ? readFileSync(systemConfigPath, "utf-8") : undefined,
+	);
 	const written: string[] = [];
 	for (const [rel, content] of Object.entries(files)) {
 		const abs = join(o.repo, rel);
