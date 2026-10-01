@@ -1,7 +1,7 @@
 {
   description = "NixPi – NixOS system agent (Pi core fork)";
 
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
 
   outputs =
     { self, nixpkgs }:
