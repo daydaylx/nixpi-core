@@ -30,6 +30,10 @@ vorausgesetzt (auf NixOS immer vorhanden). `sudo` ist nur für das spätere Akti
 - Konfiguration/Sitzungen liegen in `~/.nixpi/agent` (nie in `~/.pi`).
 - `nixpi` startet auch ohne Modell; ohne Zugang erscheint „No models available“. Zugang mit `/login`
   (OAuth/API-Key) in der TUI einrichten, API-Keys nie ins Repo schreiben.
+- OpenAI headless: `/login` → OpenAI Codex (ChatGPT-Konto) → Methode „device code": die TUI zeigt einen
+  Code, den du am Smartphone auf der angezeigten OpenAI-Seite eingibst (kein Browser/Callback am Rechner
+  nötig). Alternative: `export OPENAI_API_KEY=...` vor `nixpi` (API-Abrechnung statt ChatGPT-Abo).
+  Tokens liegen in `~/.nixpi/agent/auth.json`; nicht zwischen Rechnern kopieren (Refresh-Token).
 - Das verwaltete Config-Repo `~/nixos-config` legt `nixpi bootstrap` an (mit Rückfrage; existiert es
   schon, wird nichts überschrieben). Es übernimmt die bestehende `/etc/nixos/configuration.nix`
   (`hosts/<host>/configuration.nix`) und `hardware-configuration.nix`. Vorher
