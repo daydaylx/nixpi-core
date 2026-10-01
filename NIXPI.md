@@ -8,7 +8,7 @@ Dieses Repo ist ein Fork von `earendil-works/pi`; Baseline siehe `packages/codin
 | Bereich | Änderung |
 |---|---|
 | Identität | `piConfig.name=nixpi`, `configDir=.nixpi`, Binary `nixpi`, Env `NIXPI_CODING_AGENT_DIR` (kein Teilen von `~/.pi`) |
-| Toolset | keine Built-in-Tools (kein bash/edit/write/read); `DEFAULT_TOOL_NAMES=[]`, `nixpiBaseToolDefinitions()` liefert `{}` |
+| Toolset | keine Built-in-Tools (kein bash/edit/write/read); `DEFAULT_TOOL_NAMES=[]`, `nixpiBaseToolDefinitions()` liefert `{}`; `admin_exec` ist nur nach Adminmode-Freigabe aktiv |
 | Extensions | nur Built-in `nixpi`; Dateien/Pakete/Projekt-Extensions werden nie geladen (`policy/resources.ts`); Skills, Prompt-Templates, AGENTS.md-Kontext aus |
 | Entry | `src/cli.ts` → `runNixpiCli` (`recover`, `bootstrap`, `version`), Update-Check und Telemetrie standardmäßig aus |
 | Neuer Code | `packages/coding-agent/src/nixpi/` (Modi, Tools, Policy, Nix, History, Bootstrap, Web) |
@@ -18,6 +18,8 @@ Alles andere (Provider, Sessions, TUI, Compaction, Auth) bleibt unverändert.
 ## Modi und Tools
 
 - **CHANGE**: lesen, verifizieren, `config_patch`/`config_create_module`, `nix_build`, `nix_test`/`nix_switch` (Nutzerbestätigung + sudo), `git_commit` (Nachricht aus Intent), `decision_write`, `generation_rollback`.
+- **Adminmode**: `Meta+Y` fragt beim Aktivieren nach Bestätigung und deaktiviert sofort beim zweiten Druck. `ADMIN MODE` bleibt im Footer sichtbar. Erst dann wird `admin_exec` zusätzlich zu CHANGE-Tools verfügbar; jeder Befehl braucht `reason` und `risk` und wird einzeln unmittelbar vor der Ausführung bestätigt. Befehle laufen als aktueller OS-Nutzer in einer interaktiven TUI-Shell; sudo/Polkit-Authentifizierung bleibt beim Betriebssystem und das Geheimnis wird nicht an das Modell übergeben. Shell-Ausgabe bleibt im Terminal. Im Session-Transcript stehen Zeit, Befehl, reason, risk, Zustimmung/Ablehnung und Exit-Status; diese Toolargumente dürfen deshalb keine Geheimnisse enthalten. Sudo-Passwörter ausschließlich im OS-Terminal eingeben. Keine separate Aktionsdatei wird angelegt.
+- Adminmode ist flüchtig, wird bei neuem Sessionstart/-wechsel und beim Wechsel nach PLAN deaktiviert und nie persistiert. PLAN bleibt read-only; Admin-Shell ist dort nicht aktiv. Ohne interaktive TUI wird Admin-Shell abgelehnt.
 - **PLAN** (read-only): Lese-Tools, `ask_user`, `plan_finalize`. Übergang nach CHANGE nur durch Nutzeraktion („Ausführen“ / `/ausfuehren`).
 - Risiko-Gate: HIGH (Boot, Kernel, sudo, Benutzer, Firewall, Dateisysteme, Verschlüsselung, Secrets) nur nach freigegebenem PLAN.
 - Konfiguration: `NIXPI_CONFIG_REPO` (Standard `~/nixos-config`), `NIXPI_HOST` (Standard Hostname), `NIXPI_MCP_NIXOS_CMD`, `NIXPI_WEB=1` + `EXA_API_KEY` (optionale Websuche).

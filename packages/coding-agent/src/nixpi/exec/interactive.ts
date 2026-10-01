@@ -10,12 +10,13 @@ export async function runWithTerminal(
 	cmd: string,
 	args: string[],
 	cwd?: string,
+	env: NodeJS.ProcessEnv = process.env,
 ): Promise<number | null | undefined> {
 	if (ctx.mode !== "tui") return undefined;
 	return ctx.ui.custom<number | null>((tui, _theme, _kb, done) => {
 		tui.stop();
 		process.stdout.write("\x1b[2J\x1b[H");
-		const res = spawnSync(cmd, args, { stdio: "inherit", cwd, env: process.env });
+		const res = spawnSync(cmd, args, { stdio: "inherit", cwd, env });
 		tui.start();
 		tui.requestRender(true);
 		done(res.status);
