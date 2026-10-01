@@ -17,9 +17,10 @@ export async function runWithTerminal(
 		tui.stop();
 		process.stdout.write("\x1b[2J\x1b[H");
 		const res = spawnSync(cmd, args, { stdio: "inherit", cwd, env });
+		if (res.error) process.stderr.write(`Befehl konnte nicht gestartet werden (${cmd}): ${res.error.message}\n`);
 		tui.start();
 		tui.requestRender(true);
-		done(res.status);
+		done(res.error ? 127 : res.status);
 		return { render: () => [], invalidate: () => {} };
 	});
 }

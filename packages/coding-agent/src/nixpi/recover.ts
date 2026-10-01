@@ -67,6 +67,7 @@ export function formatRecover(r: RecoverReport): string {
 		L.push(
 			"",
 			`Healthcheck: ${r.health.ok ? "OK" : "AUFFÄLLIG"} (${r.health.state})`,
+			...(r.health.error ? [`  Fehler: ${r.health.error}`] : []),
 			...r.health.failedUnits.map((u) => `  fehlgeschlagen: ${u}`),
 		);
 	if (r.recentErrors.length) L.push("", "Letzte Fehler im Journal:", ...r.recentErrors.map((l) => `  ${l}`));

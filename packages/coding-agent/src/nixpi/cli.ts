@@ -1,4 +1,3 @@
-import { spawnSync } from "node:child_process";
 import { createInterface } from "node:readline/promises";
 import { detectSystem } from "./bootstrap/detect.ts";
 import { writeRepo } from "./bootstrap/generate.ts";
@@ -69,13 +68,9 @@ export async function runNixpiCli(args: string[]): Promise<boolean> {
 			const b = await nixBuild(new SystemRunner(), paths.repo, paths.host);
 			if (!b.success) return fail(`Build fehlgeschlagen:\n${b.errors.join("\n")}`);
 			console.log(`Build ok: ${b.outPath}`);
-			if (await confirm("Jetzt aktivieren (nh os switch / nixos-rebuild switch)?")) {
-				const hasNh = spawnSync("nh", ["--version"], { stdio: "ignore" }).status === 0;
-				const [c, a] = hasNh
-					? ["nh", ["os", "switch", paths.repo, "--hostname", paths.host]]
-					: ["sudo", ["nixos-rebuild", "switch", "--flake", `${paths.repo}#${paths.host}`]];
-				process.exitCode = spawnSync(c!, a as string[], { stdio: "inherit" }).status ?? 1;
-			}
+			console.log(
+				`System nicht aktiviert. Prüfe die Konfiguration und verwende danach NixPi im CHANGE-Modus für den bestätigten Apply-Schritt. Manueller Build: nh os build ${paths.repo} --hostname ${paths.host}`,
+			);
 		} else
 			console.log(
 				`Nächste Schritte: nixpi bootstrap --build  oder  nh os build ${paths.repo} --hostname ${paths.host}`,

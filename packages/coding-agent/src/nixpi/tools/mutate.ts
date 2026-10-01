@@ -361,19 +361,22 @@ export function mutateTools(d: NixpiDeps): AnyTool[] {
 		});
 		if (code !== 0)
 			return errorResult(
-				`${kind} fehlgeschlagen (Exit ${code}). Das laufende System blieb bzw. wurde nicht dauerhaft geändert; Diagnose mit journal_read/generation_list.`,
+				`${kind} fehlgeschlagen (Exit ${code}). Der tatsächliche Systemzustand kann unklar sein; mit nixpi recover und journal_read/generation_list prüfen.`,
 			);
 		const generation = currentGeneration();
 		const health = await healthcheck(d.runner);
-		d.store.update(cs.id, { generation, healthResult: health });
+		const confirmed = generation !== undefined && health.ok;
+		d.store.update(cs.id, { generation, healthResult: health, status: confirmed ? "applied" : "failed" });
+		if (!confirmed)
+			return errorResult(
+				`${kind} wurde vom System mit Exit 0 beendet, aber Aktivierung nicht bestätigt (Generation: ${generation ?? "unbekannt"}, Healthcheck: ${health.ok ? "OK" : (health.error ?? `${health.state}, ${health.failedUnits.length} fehlgeschlagene Units`)}). Nicht als erfolgreich verbucht; Zustand manuell prüfen und ggf. nixpi recover verwenden.`,
+			);
 		return textResult(
 			json({
 				applied: kind,
 				generation,
 				health,
-				hint: health.ok
-					? "Gesund. Nächster Schritt: git_commit."
-					: "Healthcheck auffällig – Ursache prüfen oder generation_rollback anbieten.",
+				hint: "Gesund. Nächster Schritt: git_commit.",
 			}),
 			{ generation, health },
 		);
@@ -447,9 +450,15 @@ export function mutateTools(d: NixpiDeps): AnyTool[] {
 				);
 				if (c2 !== 0)
 					return errorResult(`Aktivierung fehlgeschlagen (Exit ${c2}); Profil steht auf ${target.number}.`);
+				const actual = currentGeneration();
+				const health = await healthcheck(d.runner);
+				if (actual !== target.number || !health.ok)
+					return errorResult(
+						`Rollback-Befehl beendet, aber Zustand nicht bestätigt (Generation: ${actual ?? "unbekannt"}, Healthcheck: ${health.ok ? "OK" : (health.error ?? health.state)}). nixpi recover ausführen.`,
+					);
 				const id = d.work.currentChangeId ?? d.store.latest()?.id;
-				if (id) d.store.update(id, { status: "rolled_back" });
-				return textResult(json({ rolledBackTo: target.number, health: await healthcheck(d.runner) }));
+				if (id) d.store.update(id, { status: "rolled_back", generation: actual, healthResult: health });
+				return textResult(json({ rolledBackTo: actual, health }));
 			} catch (e) {
 				return errorResult(msg(e));
 			}

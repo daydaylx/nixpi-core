@@ -3,7 +3,14 @@ import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 import { FakeRunner } from "../../src/nixpi/exec/runner.ts";
 import { FallbackKnowledge, LocalNixBackend, McpNixosBackend, McpStdioClient } from "../../src/nixpi/nix/knowledge.ts";
-import { healthcheck, listGenerations, parseGenerationNumber, parseNixOutput } from "../../src/nixpi/nix/ops.ts";
+import {
+	healthcheck,
+	listGenerations,
+	nixBuild,
+	nixEval,
+	parseGenerationNumber,
+	parseNixOutput,
+} from "../../src/nixpi/nix/ops.ts";
 import { cleanup, tmp } from "./helpers.ts";
 
 const dirs: string[] = [];
@@ -25,6 +32,11 @@ describe("nix output parsing", () => {
 	});
 	it("clean output has no errors", () => {
 		expect(parseNixOutput("").errors).toEqual([]);
+	});
+	it("retains command-start failures in structured eval/build diagnostics", async () => {
+		const runner = new FakeRunner((cmd) => (cmd === "nix" ? { code: null, stderr: "spawn nix ENOENT" } : undefined));
+		expect((await nixEval(runner, "/repo", "host")).errors).toContain("spawn nix ENOENT");
+		expect((await nixBuild(runner, "/repo", "host")).errors).toContain("spawn nix ENOENT");
 	});
 });
 
@@ -53,18 +65,55 @@ describe("healthcheck", () => {
 		);
 		expect(await healthcheck(r)).toMatchObject({ ok: false, failedUnits: ["foo.service"] });
 	});
+	it("treats a failed failed-unit query as unknown health, not a healthy empty result", async () => {
+		const r = new FakeRunner((_c, a) =>
+			a[0] === "is-system-running" ? { stdout: "running\n" } : { code: 1, stderr: "systemctl unavailable" },
+		);
+		expect(await healthcheck(r)).toMatchObject({
+			ok: false,
+			state: "running",
+			error: "systemctl --failed fehlgeschlagen (Exit 1)",
+		});
+	});
 });
 
 describe("mcp-nixos backend", () => {
 	const script = join(import.meta.dirname, "fixtures", "fake-mcp.mjs");
-	it("talks JSON-RPC over stdio, verifies exact option names", async () => {
+	it("talks JSON-RPC over stdio and sends the documented mcp-nixos query schema", async () => {
+		const calls: Array<{ name: string; args: Record<string, unknown> }> = [];
+		const client = {
+			callTool: async (name: string, args: Record<string, unknown>) => {
+				calls.push({ name, args });
+				if (args.action === "search") return "hardware.bluetooth.enable (boolean): Whether to enable Bluetooth";
+				return args.query === "hardware.bluetooth.enable"
+					? "Type: boolean\nWhether to enable Bluetooth"
+					: "not found";
+			},
+		};
+		const b = new McpNixosBackend(client as McpStdioClient);
+		const hits = await b.searchOptions("bluetooth");
+		expect(hits.map((h) => h.name)).toContain("hardware.bluetooth.enable");
+		expect((await b.optionInfo("hardware.bluetooth.enable"))?.type).toBe("boolean");
+		expect(await b.optionInfo("hardware.bluetooth.enabel")).toBeUndefined();
+		await b.searchPackages("firefox");
+		await b.packageInfo("firefox");
+		expect(calls).toEqual([
+			{ name: "nix", args: { action: "search", query: "bluetooth", source: "nixos", type: "options" } },
+			{ name: "nix", args: { action: "info", query: "hardware.bluetooth.enable", source: "nixos", type: "option" } },
+			{ name: "nix", args: { action: "info", query: "hardware.bluetooth.enabel", source: "nixos", type: "option" } },
+			{ name: "nix", args: { action: "search", query: "firefox", source: "nixos", type: "packages" } },
+			{ name: "nix", args: { action: "info", query: "firefox", source: "nixos", type: "package" } },
+		]);
+	});
+
+	it("speaks newline-delimited JSON-RPC to an MCP stdio server", async () => {
 		const client = new McpStdioClient(process.execPath, [script], 5000);
 		try {
 			const b = new McpNixosBackend(client);
-			const hits = await b.searchOptions("bluetooth");
-			expect(hits.map((h) => h.name)).toContain("hardware.bluetooth.enable");
+			expect((await b.searchOptions("bluetooth")).map((h) => h.name)).toContain("hardware.bluetooth.enable");
 			expect((await b.optionInfo("hardware.bluetooth.enable"))?.type).toBe("boolean");
-			expect(await b.optionInfo("hardware.bluetooth.enabel")).toBeUndefined();
+			client.close();
+			expect((await b.searchOptions("bluetooth")).map((h) => h.name)).toContain("hardware.bluetooth.enable");
 		} finally {
 			client.close();
 		}

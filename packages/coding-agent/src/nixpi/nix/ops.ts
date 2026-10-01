@@ -125,6 +125,22 @@ export async function resolveHost(
 	return requested;
 }
 
+function nixDiagnostics(
+	code: number | null,
+	stderr: string,
+): Pick<BuildResult, "warnings" | "errors" | "affectedUnits"> {
+	const diagnostics = parseNixOutput(stderr);
+	if (code !== 0 && diagnostics.errors.length === 0) {
+		const details = stderr
+			.split("\n")
+			.filter((line) => line.trim())
+			.slice(-8)
+			.join(" | ");
+		diagnostics.errors.push(details || `Nix-Befehl fehlgeschlagen (Exit ${code ?? "unbekannt"})`);
+	}
+	return diagnostics;
+}
+
 export async function nixEval(runner: Runner, repo: string, host: string): Promise<BuildResult> {
 	const r = await runner.run("nix", ["eval", "--raw", `${flakeRef(repo, host)}.drvPath`], {
 		cwd: repo,
@@ -133,14 +149,14 @@ export async function nixEval(runner: Runner, repo: string, host: string): Promi
 	return {
 		success: r.code === 0,
 		outPath: r.code === 0 ? r.stdout.trim() : undefined,
-		...parseNixOutput(r.stderr),
+		...nixDiagnostics(r.code, r.stderr),
 		timedOut: r.timedOut,
 	};
 }
 
 export async function nixCheck(runner: Runner, repo: string): Promise<BuildResult> {
 	const r = await runner.run("nix", ["flake", "check", "--no-build", repo], { cwd: repo, timeoutMs: 15 * 60_000 });
-	return { success: r.code === 0, ...parseNixOutput(r.stderr), timedOut: r.timedOut };
+	return { success: r.code === 0, ...nixDiagnostics(r.code, r.stderr), timedOut: r.timedOut };
 }
 
 /** Builds the host closure without touching the running system (no sudo, no activation). */
@@ -158,7 +174,7 @@ export async function nixBuild(
 		onLine: opts.onProgress ? (l) => opts.onProgress!(summarizeProgress(l)) : undefined,
 	});
 	const out = r.stdout.trim().split("\n").filter(Boolean).pop();
-	return { success: r.code === 0 && !!out, outPath: out, ...parseNixOutput(r.stderr), timedOut: r.timedOut };
+	return { success: r.code === 0 && !!out, outPath: out, ...nixDiagnostics(r.code, r.stderr), timedOut: r.timedOut };
 }
 
 /** Hash of the flake inputs + tracked content: detects edits made after the last successful build. */
@@ -212,6 +228,7 @@ export interface Health {
 	ok: boolean;
 	state: string;
 	failedUnits: string[];
+	error?: string;
 }
 
 export async function healthcheck(runner: Runner): Promise<Health> {
@@ -222,5 +239,12 @@ export async function healthcheck(runner: Runner): Promise<Health> {
 		.split("\n")
 		.map((l) => l.trim().split(/\s+/)[0])
 		.filter((x): x is string => !!x);
-	return { ok: (state === "running" || state === "degraded") && failedUnits.length === 0, state, failedUnits };
+	const error =
+		failed.code === 0 ? undefined : `systemctl --failed fehlgeschlagen (Exit ${failed.code ?? "unbekannt"})`;
+	return {
+		ok: (state === "running" || state === "degraded") && failed.code === 0 && failedUnits.length === 0,
+		state,
+		failedUnits,
+		error,
+	};
 }

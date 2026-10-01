@@ -110,10 +110,15 @@ export class McpStdioClient {
 			}
 		});
 		child.stdin.on("error", () => {});
+		// Drain diagnostics so a noisy server cannot block on its stderr pipe. Never forward them
+		// to the model; tool errors are returned through the MCP result instead.
+		child.stderr.on("data", () => {});
 		const fail = (e: Error) => {
+			if (this.child !== child) return;
 			for (const p of this.pending.values()) p.reject(e);
 			this.pending.clear();
 			this.child = undefined;
+			this.initialized = undefined;
 		};
 		child.on("error", fail);
 		child.on("close", () => fail(new Error("mcp-nixos beendet")));
@@ -127,6 +132,7 @@ export class McpStdioClient {
 			const t = setTimeout(() => {
 				this.pending.delete(id);
 				reject(new Error(`MCP-Timeout bei ${method}`));
+				this.child?.kill();
 			}, this.timeoutMs);
 			this.pending.set(id, {
 				resolve: (v) => {
@@ -147,8 +153,10 @@ export class McpStdioClient {
 		this.initialized ??= this.request("initialize", {
 			protocolVersion: "2024-11-05",
 			capabilities: {},
-			clientInfo: { name: "nixpi", version: "0" },
-		}).then(() => {
+			clientInfo: { name: "nixpi", version: "0.1.0" },
+		}).then((result) => {
+			if (result?.protocolVersion !== "2024-11-05")
+				throw new Error(`Nicht unterstützte MCP-Protokollversion: ${String(result?.protocolVersion ?? "fehlt")}`);
 			this.child?.stdin.write(`${JSON.stringify({ jsonrpc: "2.0", method: "notifications/initialized" })}\n`);
 		});
 		return this.initialized;
@@ -166,8 +174,13 @@ export class McpStdioClient {
 	}
 
 	close(): void {
-		this.child?.kill();
+		const child = this.child;
 		this.child = undefined;
+		this.initialized = undefined;
+		this.buf = "";
+		for (const p of this.pending.values()) p.reject(new Error("mcp-nixos client geschlossen"));
+		this.pending.clear();
+		child?.kill();
 	}
 }
 
@@ -199,7 +212,7 @@ export class McpNixosBackend implements KnowledgeBackend {
 		const t = await this.client.callTool("nix", {
 			action: "search",
 			query,
-			source: "nixos-options",
+			source: "nixos",
 			type: "options",
 		});
 		return this.parse(t, "mcp-nixos:options").map((h) => ({ ...h }));
@@ -208,7 +221,7 @@ export class McpNixosBackend implements KnowledgeBackend {
 		const t = await this.client.callTool("nix", {
 			action: "info",
 			query: name,
-			source: "nixos-options",
+			source: "nixos",
 			type: "option",
 		});
 		if (!t || /not found|nicht gefunden/i.test(t)) return undefined;
@@ -223,7 +236,7 @@ export class McpNixosBackend implements KnowledgeBackend {
 		const t = await this.client.callTool("nix", {
 			action: "search",
 			query,
-			source: "nixos-packages",
+			source: "nixos",
 			type: "packages",
 		});
 		return this.parse(t, "mcp-nixos:packages");
@@ -232,7 +245,7 @@ export class McpNixosBackend implements KnowledgeBackend {
 		const t = await this.client.callTool("nix", {
 			action: "info",
 			query: name,
-			source: "nixos-packages",
+			source: "nixos",
 			type: "package",
 		});
 		if (!t || /not found|nicht gefunden/i.test(t)) return undefined;
