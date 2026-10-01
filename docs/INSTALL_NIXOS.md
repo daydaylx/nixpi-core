@@ -30,8 +30,14 @@ vorausgesetzt (auf NixOS immer vorhanden). `sudo` ist nur für das spätere Akti
 - Konfiguration/Sitzungen liegen in `~/.nixpi/agent` (nie in `~/.pi`).
 - `nixpi` startet auch ohne Modell; ohne Zugang erscheint „No models available“. Zugang mit `/login`
   (OAuth/API-Key) in der TUI einrichten, API-Keys nie ins Repo schreiben.
-- Das verwaltete Config-Repo `~/nixos-config` legt erst `nixpi bootstrap` an (mit Rückfrage).
-  Vorher `git config --global user.name/user.email` setzen.
+- Das verwaltete Config-Repo `~/nixos-config` legt `nixpi bootstrap` an (mit Rückfrage; existiert es
+  schon, wird nichts überschrieben). Es übernimmt die bestehende `/etc/nixos/configuration.nix`
+  (`hosts/<host>/configuration.nix`) und `hardware-configuration.nix`. Vorher
+  `git config --global user.name/user.email` setzen.
+- Das Repo vorab erzeugen (auf Fedora, gegen die NixOS-Dateien) ist möglich; sein `flake.lock` pinnt
+  nixpkgs, home-manager und NixPi. Es ist **nicht aktiviert**: erst `nh os build ~/nixos-config
+  --hostname <host>` prüfen, dann bewusst `nh os switch`. Das Flake evaluiert (getestet auf Fedora);
+  ein Switch ist nicht getestet.
 
 ## Aktualisieren
 
